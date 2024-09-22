@@ -1,7 +1,8 @@
 #include <iostream>
+#include "game.h"
 
 int main() {
-    std::cout << "Server file" << std::endl;
+    Game game = Game();
 
     return 0;
 }

@@ -1,10 +1,8 @@
 #include <iostream>
 
-#include "game.h"
 
 int main() {
-    Game game = Game();
-
+    std::cout << "client file" << std::endl;;
 
     return 0;
 }
