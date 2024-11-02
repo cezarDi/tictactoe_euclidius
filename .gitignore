@@ -32,4 +32,14 @@
 *.app
 
 build/
-log.txt
+
+log_server.txt
+log_client.txt
+
+config_client.toml
+config_server.toml
+
+.ccls-cache/
+.cache/
+
+compile_commands.json
