@@ -8,5 +8,6 @@ add_executable(server src/server.cpp src/game.cpp src/logger.cpp)
 add_executable(client src/client.cpp src/logger.cpp)
 
 target_link_libraries(server toml11::toml11)
+target_link_libraries(client toml11::toml11)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
