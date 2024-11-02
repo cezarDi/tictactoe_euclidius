@@ -5,6 +5,9 @@
 
 #include "logger.h"
 
+Logger::Logger() {}
+
+
 Logger::Logger(const std::string& filename) {
     logFile.open(filename, std::ios::app);
     if (!logFile.is_open()) {
@@ -12,9 +15,20 @@ Logger::Logger(const std::string& filename) {
     }
 }
 
+
 Logger::~Logger() {
     logFile.close();
 }
+
+
+void Logger::setLogFile(const std::string &filename) {
+    logFile.close();
+    logFile.open(filename, std::ios::app);
+    if (!logFile.is_open()) {
+        std::cerr << "Error opening log file." << std::endl;
+    }
+}
+
 
 void Logger::log(LogLevel level, const std::string& message) {
     time_t now = time(0);
@@ -31,6 +45,7 @@ void Logger::log(LogLevel level, const std::string& message) {
         logFile.flush();
     }
 }
+
 
 std::string Logger::levelToString(LogLevel level) {
     switch (level) {

@@ -12,9 +12,11 @@ enum LogLevel {
 
 class Logger {
 public:
+    Logger();
     Logger(const std::string& filename);
     ~Logger();
     void log(LogLevel level, const std::string& message);
+    void setLogFile(const std::string& filename);
 
 private:
     std::ofstream logFile;
