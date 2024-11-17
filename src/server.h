@@ -1,65 +1,32 @@
+#pragma once
+
 #include <iostream>
 #include <string>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <array>
+#include <map>
 
-#include <toml.hpp>
 
 #include "logger.h"
-#include "game.h"
 
 class Server {
 public:
-    Server(const std::string& config_file) {
-        parse_config(config_file);
-
-        int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-        server_addr = new_sockaddr(port);
-
-        if (server_fd < 0) {
-            logger.log(ERROR, "Failed to create server socket.");
-            return;
-        } else {
-            logger.log(INFO, "Server socket was successfully created.");
-        }
-
-
-        if (bind(server_fd, (struct sockaddr *) &server_addr, sizeof(server_addr)) != 0) {
-            logger.log(ERROR, "Failed to bind to port.");
-            return;
-        } else {
-            logger.log(INFO, "Port was binded successfully.");
-        }
-
-
-        if (listen(server_fd, max_clients) != 0) {
-            logger.log(ERROR, "Listen failed.\n");
-            return;
-        }
-
-
-        logger.log(INFO, "Waiting for a client to connect...");
-    }
-
-
-    ~Server() {
-        logger.log(INFO, "Shutting server down.");
-        close(server_fd);
-    }
-
-
-    void handle_connection() {
-
-    }
+    Server(const std::string& config_file);
+    ~Server();
 
 private:
     Logger logger;
     unsigned int port;
     unsigned int max_clients = 2;
-    int server_fd;
+    int server_sock;
     struct sockaddr_in server_addr;
+
+    std::array<int, 2> client_sockets;
+    std::map<std::string, std::string> users;
+
 
     struct sockaddr_in new_sockaddr(int port) {
         struct sockaddr_in server_addr;
@@ -70,12 +37,6 @@ private:
         return server_addr;
     }
 
-    void parse_config(const std::string& config_file) {
-        auto data = toml::parse(config_file, toml::spec::v(1, 1, 0));
-
-        port = toml::find<unsigned int>(data, "port");
-
-        std::string log_file = toml::find<std::string>(data, "log_file");
-        logger.setLogFile(log_file);
-    }
+    void parse_config(const std::string& config_file);
+    void auth_user(int new_socket);
 };
