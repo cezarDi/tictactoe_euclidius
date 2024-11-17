@@ -33,11 +33,8 @@
 
 build/
 
-log_server.txt
-log_client.txt
-
-config_client.toml
-config_server.toml
+logs/
+configs/
 
 .ccls-cache/
 .cache/
