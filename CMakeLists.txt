@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
 project(tictactoe)
-include(FetchContent)
 
 find_package(OpenSSL REQUIRED)
 add_subdirectory(toml11)
