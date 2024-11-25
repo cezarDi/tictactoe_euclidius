@@ -1,2 +1,50 @@
+
 # tictactoe
 Online version of popular game
+## How
+It runs with simple clients-server architecture. To play you should run server binary and two clients binaries.
+## Dependencies
+1. [openssl](https://github.com/openssl/openssl)
+2. [toml11](https://github.com/ToruNiina/toml11)
+
+## Install 
+Add a configuration files:
+```bash
+mkdir configs
+touch configs/config_client.toml # for client configuration
+
+#or/and
+
+touch configs/config_server.toml
+```
+Fill the config files:
+```toml
+#config_client.toml
+port = 1234
+server_ip = "127.0.0.1"
+log_file = "logs/log_client.txt
+
+login = "Alice"
+password = "password1"
+```
+```toml
+#config_server.toml
+port = 1234
+log_file = "logs/log_server.txt"
+
+[allowed_users]
+"Alice" = "c8eb6be7da27a445473bc50d1bbf60d91e06b1332156ffdd252d87270bf351bf" #sha256 of "password1"
+```
+ ## Building
+ ```bash
+mkdir build
+cd build
+cmake ..
+cd ..
+cmake --build build
+```
+## Running
+```bash
+./build/server
+./build/client
+```
