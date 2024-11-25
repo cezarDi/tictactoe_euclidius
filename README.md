@@ -1,6 +1,5 @@
-
 # tictactoe
-Online version of popular game
+Online version of popular game.
 ## How
 It runs with simple clients-server architecture. To play you should run server binary and two clients binaries.
 ## Dependencies
@@ -43,6 +42,15 @@ cmake ..
 cd ..
 cmake --build build
 ```
+
+## How to play
+The client will show you the field and you should put your symbol in blank space. To put your symbol you should send two numbers from 1 to 3:
+```bash
+2 2
+1 3
+# and so on
+```
+Firs number is row, second is a column where you want to make move.
 ## Running
 ```bash
 ./build/server
