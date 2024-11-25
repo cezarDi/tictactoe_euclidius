@@ -32,8 +32,52 @@ Client::Client(const char* config_file): player(config_file) {
         logger.log(INFO, "Connected to server successfully.");
     }
 
-    if (authenticate() == FAIL) {
+    if (authenticate() != SUCCESS) {
         logger.log(ERROR, "Invalid login or password.");
+        return;
+    }
+
+    play();
+}
+
+void Client::play() {
+    char playing_role[25] = {0};
+    int send_size = 2;
+    char sendbuf[2];
+    char field[9];
+    std::pair<char, char> move;
+
+    read(client_fd, playing_role, 24);
+    std::cout << playing_role << std::endl;
+
+    for (;;) {
+        read(client_fd, field, 9);
+        
+        if (strncmp(field, "XXXXXXXXX", 9) == 0) {
+            std::cout << "X win" << std::endl;
+            return;
+        } else if (strncmp(field, "OOOOOOOOO", 9) == 0) {
+            std::cout << "O win" << std::endl;
+            return;
+        } else if (strncmp(field ,"DDDDDDDDD", 9) == 0) {
+            std::cout << "Draw" << std::endl;
+            return;
+        }
+
+        for (char i = 0; i < 3; ++i) {
+            std::cout << '|';
+            for (char j = 0; j < 3; ++j) {
+                std::cout << field[i * 3 + j];
+                std::cout << '|';
+            }
+            std::cout << '\n';
+        }
+        move = player.get_move_position();
+
+        sendbuf[0] = move.first;
+        sendbuf[1] = move.second;
+
+        send(client_fd, sendbuf, send_size, 0);
     }
 }
 
@@ -55,7 +99,7 @@ void Client::parse_config(const std::string& config_file) {
 auth_e Client::authenticate() {
     std::string password_hash = sha256(player.get_password());
     std::string login = player.get_login();
-    char recv_buf[5];
+    char recv_buf[5] = {0};
 
     std::string to_send = login + " "+ password_hash;
 

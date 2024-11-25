@@ -21,6 +21,7 @@ public:
     ~Client();
 
     void parse_config(const std::string& config_file);
+    void play();
 
 private:
     int client_fd;
