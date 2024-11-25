@@ -43,30 +43,3 @@ std::string sha256(const std::string& str) {
     return ss.str();
 }
 
-void generate_rsa_keys() {
-    EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr);
-    if (!ctx) {
-        throw std::runtime_error("Failed to create EVP_PKEY_CTX.");
-    }
-
-    if (EVP_PKEY_keygen_init(ctx) <= 0) {
-        EVP_PKEY_CTX_free(ctx);
-        throw std::runtime_error("Failed to init keygen.");
-    }
-
-    if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, 2048) <= 0) {
-        EVP_PKEY_CTX_free(ctx);
-        throw std::runtime_error("Failed to set key size.");
-    }
-
-    EVP_PKEY* pkey = nullptr;
-    if (EVP_PKEY_keygen(ctx, &pkey) <= 0) {
-        EVP_PKEY_CTX_free(ctx);
-        throw std::runtime_error("Failed to generate keys.");
-    }
-
-    //TODO
-
-
-}
-
