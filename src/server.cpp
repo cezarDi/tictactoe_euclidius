@@ -2,6 +2,7 @@
 #include <string>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <map>
@@ -11,6 +12,17 @@
 #include "logger.h"
 #include "game.h"
 #include "server.h"
+#include "client.h"
+
+void clear_socket_buffer(int socket_fd) {
+    char buffer[1024];
+    while (true) {
+        ssize_t bytes_read = recv(socket_fd, buffer, sizeof(buffer), MSG_DONTWAIT);
+        if (bytes_read <= 0) {
+            break;
+        }
+    }
+}
 
 Server::Server(const std::string& config_file) {
     int new_socket;
@@ -40,25 +52,94 @@ Server::Server(const std::string& config_file) {
     }
     logger.log(INFO, "Waiting for a client to connect...");
 
-    new_socket = accept(server_sock, (struct sockaddr *)&server_addr, (socklen_t*)&addr_len);
+    for (int i = 0; i < max_clients; ++i) {
+        new_socket = accept(server_sock, (struct sockaddr *)&server_addr, (socklen_t*)&addr_len);
 
-    if (new_socket < 0) {
-        logger.log(ERROR, "Accept failed.");
-        perror("Accept failed.");
-        close(server_sock);
-        return;
-    } 
+        if (new_socket < 0) {
+            logger.log(ERROR, "Accept failed.");
+            close(server_sock);
+            return;
+        } 
 
-    logger.log(INFO, "Client connected.");
+        logger.log(INFO, "Client connected.");
 
+        if (auth_user(new_socket) != SUCCESS) {
+            logger.log(INFO, "Authentication failed.");
+        }
+
+        client_sockets[i] = new_socket;
+    }
     
-    auth_user(new_socket);
-
-    /* read(new_socket, buffer, buffer_size); */
-    /* std::cout << "Received message: " << buffer << std::endl; */
+    handle_clients();
 }
 
-void Server::auth_user(int new_socket) {
+void Server::handle_clients() {
+    int player_move_size = 2;
+    char player_move[2];
+    std::string field;
+    std::string play_x = "You are playing with 'X'";
+    std::string play_o = "You are playing with 'O'";
+    std::pair<char, char> move;
+    char move_sign[2] = {'X', 'O'};
+    int valread;
+    Game game;
+    GameState win_state;
+
+
+    send(client_sockets[0], play_x.c_str(), play_x.length(), 0);
+    send(client_sockets[1], play_o.c_str(), play_o.length(), 0);
+
+    for (;;) {
+        for (int current_client = 0; current_client < max_clients; ++current_client) {
+            field = game.get_field_as_string();
+            send(client_sockets[current_client], field.c_str(), field.length(), 0);
+            valread = read(client_sockets[current_client], player_move, player_move_size);
+
+            if (valread <= 0) {
+                logger.log(INFO, "Client disconnected.");
+                break;
+            }
+
+            move.first = player_move[0] - 0x30;
+            move.second = player_move[1] - 0x30;
+
+            game.make_move(move, move_sign[current_client]);
+            game.print_field();
+            
+            win_state = game.check_win(move);
+
+            switch (win_state) {
+                case X_WIN : {
+                                 logger.log(INFO, "X win");
+                                 field = "XXXXXXXXX";
+                                 for (int i = 0; i < 2; ++i) {
+                                     send(client_sockets[i], field.c_str(), field.length(), 0);
+                                 }
+                                 return;
+                             }
+                case O_WIN : {
+                                 logger.log(INFO, "O win");
+                                 field = "OOOOOOOOO";
+                                 for (int i = 0; i < 2; ++i) {
+                                     send(client_sockets[i], field.c_str(), field.length(), 0);
+                                 }
+                                 return;
+                             }
+                case DRAW : {
+                                 logger.log(INFO, "Draw");
+                                 field = "DDDDDDDDD";
+                                 for (int i = 0; i < 2; ++i) {
+                                     send(client_sockets[i], field.c_str(), field.length(), 0);
+                                 }
+                                 return;
+                            }
+                case UNKNOWN : break;
+            }
+        }
+    }
+}
+
+auth_e Server::auth_user(int new_socket) {
     int buffer_size = 2048;
     char buffer[2048];
 
@@ -66,6 +147,7 @@ void Server::auth_user(int new_socket) {
     std::string input_password;
     const char* space_pos;
 
+    clear_socket_buffer(new_socket);
     read(new_socket, buffer, buffer_size);
 
     space_pos = strchr(buffer, ' ');
@@ -77,12 +159,15 @@ void Server::auth_user(int new_socket) {
     if (lt == users.end()) {
         send(new_socket, "-1", 3, 0); //send -1 as error
         logger.log(INFO, "Incorrect login.");
+        return FAIL;
     } else if (lt->second == input_password) {
         send(new_socket, "0", 2, 0);
         logger.log(INFO, "User " + input_login + " authenticated.");
+        return SUCCESS;
     } else {
         send(new_socket, "-1", 3, 0); //send -1 as error
         logger.log(INFO, "Incorrect password.");
+        return FAIL;
     }
 }
 

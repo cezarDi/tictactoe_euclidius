@@ -11,6 +11,7 @@
 
 
 #include "logger.h"
+#include "client.h"
 
 class Server {
 public:
@@ -20,11 +21,12 @@ public:
 private:
     Logger logger;
     unsigned int port;
-    unsigned int max_clients = 2;
     int server_sock;
     struct sockaddr_in server_addr;
 
+    unsigned int max_clients = 2;
     std::array<int, 2> client_sockets;
+
     std::map<std::string, std::string> users;
 
 
@@ -38,5 +40,6 @@ private:
     }
 
     void parse_config(const std::string& config_file);
-    void auth_user(int new_socket);
+    auth_e auth_user(int new_socket);
+    void handle_clients();
 };
