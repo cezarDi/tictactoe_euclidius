@@ -22,6 +22,9 @@ private:
     Logger logger;
     unsigned int port;
     int server_sock;
+
+    int seconds_per_move;
+
     struct sockaddr_in server_addr;
 
     unsigned int max_clients = 2;

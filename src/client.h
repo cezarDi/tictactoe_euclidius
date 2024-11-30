@@ -29,6 +29,7 @@ private:
     Logger logger;
     const char* server_ip;
     struct sockaddr_in server_addr;
+    int seconds_per_move;
 
     Player player;
 

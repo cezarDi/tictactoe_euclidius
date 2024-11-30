@@ -68,6 +68,8 @@ Server::Server(const std::string& config_file) {
         }
 
         client_sockets[i] = new_socket;
+        std::string str_move_time = std::to_string(seconds_per_move);
+        send(new_socket, str_move_time.c_str(), str_move_time.size(), 0);
     }
     
     handle_clients();
@@ -102,6 +104,12 @@ void Server::handle_clients() {
 
             move.first = player_move[0] - 0x30;
             move.second = player_move[1] - 0x30;
+
+            if (player_move[0] == -1 && player_move[1] == -1) {
+                int opponent_socket = client_sockets[1 - current_client];
+                char message[] = "WWWWWWWWW";
+                send(opponent_socket, message, strlen(message), 0);
+            }
 
             game.make_move(move, move_sign[current_client]);
             game.print_field();
@@ -183,5 +191,6 @@ void Server::parse_config(const std::string& config_file) {
     users = toml::find<std::map<std::string, std::string>>(data, "allowed_users");
     port = toml::find<unsigned int>(data, "port");
     std::string log_file = toml::find<std::string>(data, "log_file");
+    seconds_per_move = toml::find<int>(data, "seconds_per_move");
     logger.setLogFile(log_file);
 }

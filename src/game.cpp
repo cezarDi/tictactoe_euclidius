@@ -25,18 +25,23 @@ GameState Game::check_win(std::pair<char, char> moved_position) {
      * for diagonal line
      */
     if (
-            (get_sign(moved_position) == get_sign((moved_position.first + 1) % 3, moved_position.second) && get_sign(moved_position) == get_sign((moved_position.first + 2) % 3, moved_position.second)) ||
-            (get_sign(moved_position) == get_sign(moved_position.first, (moved_position.second + 1) % 3) && get_sign(moved_position) == get_sign(moved_position.first, (moved_position.second + 2) % 3)) ||
-            (get_sign(moved_position) == get_sign((moved_position.first + 1) % 3, (moved_position.second + 1) % 3) && get_sign(moved_position) == get_sign((moved_position.first + 2) % 3, (moved_position.second + 2) % 3)) ||
-            (get_sign(moved_position) == get_sign((moved_position.first + 1) % 3, (moved_position.second - 1) % 3) && get_sign(moved_position) == get_sign((moved_position.first + 2) % 3, (moved_position.second - 2) % 3))
-       ) {
+            (get_sign(moved_position) == get_sign((moved_position.first + 1) % 3, moved_position.second) &&
+             get_sign(moved_position) == get_sign((moved_position.first + 2) % 3, moved_position.second)) ||
+            (get_sign(moved_position) == get_sign(moved_position.first, (moved_position.second + 1) % 3) &&
+             get_sign(moved_position) == get_sign(moved_position.first, (moved_position.second + 2) % 3)) ||
+            (get_sign(moved_position) == get_sign((moved_position.first + 1) % 3, (moved_position.second + 1) % 3) &&
+             get_sign(moved_position) == get_sign((moved_position.first + 2) % 3, (moved_position.second + 2) % 3)) ||
+            (get_sign(moved_position) == get_sign((moved_position.first + 1) % 3, (moved_position.second - 1) % 3) &&
+             get_sign(moved_position) == get_sign((moved_position.first + 2) % 3, (moved_position.second - 2) % 3))
+            ) {
         win_state = true;
     }
 
     if (win_state) {
         if (get_sign(moved_position) == 'X') result = X_WIN;
         else result = O_WIN;
-    } else {
+    }
+    else {
         /*
          * checks if there is a blank field to continue the game
          */

@@ -36,7 +36,9 @@ Client::Client(const char* config_file): player(config_file) {
         logger.log(ERROR, "Invalid login or password.");
         return;
     }
-
+    char seconds_per_move_str[10] = {};
+    read(client_fd, seconds_per_move_str, 10);
+    seconds_per_move = atoi(seconds_per_move_str);
     play();
 }
 
@@ -46,6 +48,8 @@ void Client::play() {
     char sendbuf[2];
     char field[9];
     std::pair<char, char> move;
+
+    player.set_time_per_move(seconds_per_move);
 
     read(client_fd, playing_role, 24);
     std::cout << playing_role << std::endl;
@@ -61,6 +65,9 @@ void Client::play() {
             return;
         } else if (strncmp(field ,"DDDDDDDDD", 9) == 0) {
             std::cout << "Draw" << std::endl;
+            return;
+        } else if (strncmp(field, "WWWWWWWWW", 9) == 0) {
+            std::cout << "You won by time" << std::endl;
             return;
         }
 
@@ -78,6 +85,10 @@ void Client::play() {
         sendbuf[1] = move.second;
 
         send(client_fd, sendbuf, send_size, 0);
+        if (move.first == -1 && move.second == -1) {
+            std::cout << "You lost by time" << std::endl;
+            return;
+        }
     }
 }
 
