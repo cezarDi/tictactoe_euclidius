@@ -21,7 +21,7 @@ Fill the config files:
 #config_client.toml
 port = 1234
 server_ip = "127.0.0.1"
-log_file = "logs/log_client.txt
+log_file = "logs/log_client.txt"
 
 login = "Alice"
 password = "password1"
